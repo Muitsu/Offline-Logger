@@ -41,7 +41,7 @@ dependencies:
   open_filex: ^4.3.2
   path_provider: ^2.1.2
 ```
-### 2. ⚙️ Android Configuration
+### 2. ⚙️ AndroidManifest Configuration
 ```
 <activity
   ...
@@ -53,14 +53,16 @@ dependencies:
 
 ### 3. 📂 Log Storage Location
 ```
-/storage/emulated/0/Android/data/com.example.appname/files/AppLogs
+../Android/data/com.example.appname/files/AppLogs
 
 ```
 ## 🛠️ Usage
 ### 1. Initialize the logger
 Call this in main() or app startup:
 ```dart
-await AppLogger().initialize(logFileName: "app_log");
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await AppLogger().initialize(logFileName: "app_log");
 ```
 
 ### 2. Start logging

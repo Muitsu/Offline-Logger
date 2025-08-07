@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:offline_logs/app_logger.dart';
 import 'package:offline_logs/home.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppLogger().initialize();
   // Log a test message

@@ -32,15 +32,13 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: [
           IconButton(
             onPressed: () async {
-              await AppLogger().openLogExternally();
-            },
-            icon: Icon(Icons.folder),
-          ),
-          IconButton(
-            onPressed: () async {
               await AppLogger().shareLogs();
             },
             icon: Icon(Icons.share),
+          ),
+          ActionChip(
+            label: Text("Open Log"),
+            onPressed: () async => await AppLogger().openLogExternally(),
           ),
         ],
       ),
