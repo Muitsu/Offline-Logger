@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:logger/logger.dart';
+import 'package:offline_logs/app-log/log_data.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:open_filex/open_filex.dart';
@@ -68,39 +69,44 @@ class AppLogger {
   }
 
   // 3. Public logging methods
-  void debug(String functionName, String message) {
+  Future<void> debug(String functionName, dynamic message) async {
     if (_logFileName != null && _logger != null) {
       _logger!.d(message);
-      FlutterLogs.logInfo(_tag, functionName, message);
+      await FlutterLogs.logInfo(_tag, functionName, message.toString());
     }
+    return;
   }
 
-  void info(String functionName, String message) {
+  Future<void> info(String functionName, dynamic message) async {
     if (_logFileName != null && _logger != null) {
       _logger!.i(message);
-      FlutterLogs.logInfo(_tag, functionName, message);
+      await FlutterLogs.logInfo(_tag, functionName, message.toString());
     }
+    return;
   }
 
-  void warning(String functionName, String message) {
+  Future<void> warning(String functionName, dynamic message) async {
     if (_logFileName != null && _logger != null) {
       _logger!.w(message);
-      FlutterLogs.logWarn(_tag, functionName, message);
+      await FlutterLogs.logWarn(_tag, functionName, message.toString());
     }
+    return;
   }
 
-  void error(String functionName, String message) {
+  Future<void> error(String functionName, dynamic message) async {
     if (_logFileName != null && _logger != null) {
       _logger!.e(message);
-      FlutterLogs.logError(_tag, functionName, message);
+      await FlutterLogs.logError(_tag, functionName, message.toString());
     }
+    return;
   }
 
-  void severe(String functionName, String message) {
+  Future<void> severe(String functionName, dynamic message) async {
     if (_logFileName != null && _logger != null) {
       _logger!.d(message);
-      info(functionName, message);
+      await info(functionName, message);
     }
+    return;
   }
 
   // 4. Export logs functionality
@@ -120,9 +126,10 @@ class AppLogger {
   }
 
   // 5. Share logs functionality
-  Future<void> shareLogs() async {
+  Future<void> shareLogs({bool getLatest = true, String? customPpath}) async {
     try {
-      final String exportedPath = await _getLogFilePath();
+      final String exportedPath =
+          customPpath ?? await _getLogFilePath(getLatest: getLatest);
       if (exportedPath.isNotEmpty) {
         final File file = File(exportedPath);
         if (await file.exists()) {
@@ -139,8 +146,12 @@ class AppLogger {
   }
 
   // New function to open the log file with an external app
-  Future<void> openLogExternally() async {
-    final String logFilePath = await _getLogFilePath();
+  Future<void> openLogExternally({
+    bool getLatest = true,
+    String? customPpath,
+  }) async {
+    final String logFilePath =
+        customPpath ?? await _getLogFilePath(getLatest: getLatest);
 
     if (logFilePath.isNotEmpty) {
       final file = File(logFilePath);
@@ -162,19 +173,68 @@ class AppLogger {
     }
   }
 
+  Future<String> readLogAsString({
+    bool getLatest = true,
+    String? customPpath,
+  }) async {
+    final String logFilePath =
+        customPpath ?? await _getLogFilePath(getLatest: getLatest);
+
+    if (logFilePath.isNotEmpty) {
+      final file = File(logFilePath);
+      if (await file.exists()) {
+        return await file.readAsString();
+      } else {
+        String errMsg = "Log file not found at path: $logFilePath";
+        error("openLogsExternally", errMsg);
+        return errMsg;
+      }
+    } else {
+      String errMsg = "No log file path found.";
+      error("openLogsExternally", "No log file path found.");
+      return errMsg;
+    }
+  }
+
+  Future<List<LogData>> readLogAsObject({
+    bool getLatest = true,
+    String? customPpath,
+  }) async {
+    final String logFilePath =
+        customPpath ?? await _getLogFilePath(getLatest: getLatest);
+
+    if (logFilePath.isNotEmpty) {
+      final file = File(logFilePath);
+      if (await file.exists()) {
+        final logString = await file.readAsString();
+        return LogData.fromData(logString);
+      } else {
+        String errMsg = "Log file not found at path: $logFilePath";
+        error("openLogsExternally", errMsg);
+        return [];
+      }
+    } else {
+      error("openLogsExternally", "No log file path found.");
+      return [];
+    }
+  }
+
   // Private helper to get the path to the current log file
-  Future<String> _getLogFilePath() async {
+  Future<String> _getLogFilePath({bool getLatest = true}) async {
     try {
       // ... same method as before
       final directory = await getExternalStorageDirectory();
-      info("getLogFilePath", directory?.path ?? "No Directory Found");
+      // info("getLogFilePath", directory?.path ?? "No Directory Found");
       final logsDirectory = Directory('${directory!.path}/$_saveLogPath');
 
       // This is a simplified approach; you might need to adjust based on flutter_logs' directory structure.
       final List<FileSystemEntity> files = logsDirectory.listSync(
         recursive: true,
       );
-      for (var file in files) {
+
+      final sortedFile = getLatest ? files.reversed : files;
+
+      for (var file in sortedFile) {
         if (file is File && file.path.endsWith('.log')) {
           // Return the first log file found
           return file.path;
@@ -185,6 +245,35 @@ class AppLogger {
       error("getLogFilePath", e.toString());
       // Fallback if no log file is found
       return '';
+    }
+  }
+
+  // Helper to get all the path to the current log file
+  Future<List<File>> getAllLogFilePath({bool sortedFromLatest = true}) async {
+    try {
+      // ... same method as before
+      final directory = await getExternalStorageDirectory();
+      // info("getLogFilePath", directory?.path ?? "No Directory Found");
+      final logsDirectory = Directory('${directory!.path}/$_saveLogPath');
+
+      // This is a simplified approach; you might need to adjust based on flutter_logs' directory structure.
+      final List<FileSystemEntity> files = logsDirectory.listSync(
+        recursive: true,
+      );
+
+      final sortedFile = sortedFromLatest ? files.reversed : files;
+
+      List<File> pathList = [];
+      for (var file in sortedFile) {
+        if (file is File && file.path.endsWith('.log')) {
+          pathList.add(file);
+        }
+      }
+      return pathList;
+    } catch (e) {
+      error("getLogFilePath", e.toString());
+      // Fallback if no log file is found
+      return [];
     }
   }
 
