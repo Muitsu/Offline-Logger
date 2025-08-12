@@ -1,3 +1,10 @@
+<div style="display: flex; overflow-x: auto; gap: 10px; padding: 10px; scroll-snap-type: x mandatory;">
+  <img src="https://raw.githubusercontent.com/Muitsu/Offline-Logger/refs/heads/main/assets/home.png" height="200" style="scroll-snap-align: center;" />
+  <img src="https://raw.githubusercontent.com/Muitsu/Offline-Logger/refs/heads/main/assets/create.png" height="200" style="scroll-snap-align: center;" />
+  <img src="https://raw.githubusercontent.com/Muitsu/Offline-Logger/refs/heads/main/assets/read_clean.png" height="200" style="scroll-snap-align: center;" />
+  <img src="https://raw.githubusercontent.com/Muitsu/Offline-Logger/refs/heads/main/assets/share.png" height="200" style="scroll-snap-align: center;" />
+</div>
+
 # Offline Logger
 
 A simple and powerful logging utility for Flutter that combines:
