@@ -37,7 +37,10 @@ class _ReadLogSheetState extends State<ReadLogSheet> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("${data.level} - ${data.method}"),
+              Text(
+                "${data.level} - ${data.method}",
+                style: TextStyle(color: data.getStatusColor()),
+              ),
               SizedBox(height: 8),
               Text("Message:"),
               Text(data.message),

@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class LogData {
   final String tag;
   final String method;
@@ -67,5 +69,15 @@ class LogData {
       date: json['date'] ?? '',
       level: json['level'] ?? '',
     );
+  }
+
+  Color? getStatusColor() {
+    final map = {
+      "info": const Color.fromARGB(255, 48, 99, 189),
+      "warning": const Color.fromARGB(255, 190, 146, 14),
+      "error": const Color.fromARGB(255, 133, 29, 22),
+    };
+
+    return map[level.toLowerCase()];
   }
 }

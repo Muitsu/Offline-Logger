@@ -118,7 +118,7 @@ class _MyHomePageState extends State<MyHomePage> {
       isScrollControlled: true,
       backgroundColor: Color(0xFF2F3136),
       clipBehavior: Clip.antiAlias,
-      builder: (_) => ReadLogSheet(),
+      builder: (_) => ReadLogSheet(path: path),
     );
   }
 
@@ -139,11 +139,26 @@ class _MyHomePageState extends State<MyHomePage> {
             children: [
               ListTile(
                 leading: Icon(Icons.description),
-                title: Text('File ${index + 1}'),
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Log ${index + 1}',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text(
+                      logData[index].lastAccessedSync().toString().split(
+                        " ",
+                      )[0],
+                      style: TextStyle(fontSize: 12, color: Colors.white54),
+                    ),
+                  ],
+                ),
                 subtitle: Text(
                   logData[index].path,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 12, color: Colors.white54),
                 ),
                 onTap: () async => readLog(path: logData[index].path),
               ),

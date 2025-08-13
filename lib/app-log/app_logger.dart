@@ -38,8 +38,8 @@ class AppLogger {
         methodCount: 2, // Number of method calls to be displayed
         errorMethodCount: 8, // Number of method calls if stacktrace is provided
         lineLength: 120, // Width of the output
-        colors: true, // Colorful log messages
-        printEmojis: true, // Print an emoji for each log message
+        colors: true, // Colorful log msgs
+        printEmojis: true, // Print an emoji for each log msg
         // Should each log print contain a timestamp
         dateTimeFormat: DateTimeFormat.onlyTimeAndSinceStart,
       ),
@@ -65,46 +65,76 @@ class AppLogger {
     //Clear Log when exceed 10 mb
     await _autoClearLogsIfExceedsLimit(maxSizeBytes: limitLogByte);
     // [IMPORTANT] The first log line must never be called before 'FlutterLogs.initLogs'
-    info("setUpLogs", "setUpLogs: Setting up logs..");
+    info("setUpLogs", msg: "setUpLogs: Setting up logs..");
   }
 
   // 3. Public logging methods
-  Future<void> debug(String functionName, dynamic message) async {
+  Future<void> debug(
+    String functionName, {
+    String? tag,
+    required dynamic msg,
+    bool saveLog = false,
+  }) async {
     if (_logFileName != null && _logger != null) {
-      _logger!.d(message);
-      await FlutterLogs.logInfo(_tag, functionName, message.toString());
+      _logger!.d(msg);
+      if (!saveLog) return;
+      await FlutterLogs.logInfo(tag ?? _tag, functionName, msg.toString());
     }
     return;
   }
 
-  Future<void> info(String functionName, dynamic message) async {
+  Future<void> info(
+    String functionName, {
+    String? tag,
+    required dynamic msg,
+    bool saveLog = false,
+  }) async {
     if (_logFileName != null && _logger != null) {
-      _logger!.i(message);
-      await FlutterLogs.logInfo(_tag, functionName, message.toString());
+      _logger!.i(msg);
+      if (!saveLog) return;
+      await FlutterLogs.logInfo(tag ?? _tag, functionName, msg.toString());
     }
     return;
   }
 
-  Future<void> warning(String functionName, dynamic message) async {
+  Future<void> warning(
+    String functionName, {
+    String? tag,
+    required dynamic msg,
+    bool saveLog = false,
+  }) async {
     if (_logFileName != null && _logger != null) {
-      _logger!.w(message);
-      await FlutterLogs.logWarn(_tag, functionName, message.toString());
+      _logger!.w(msg);
+      if (!saveLog) return;
+      await FlutterLogs.logWarn(tag ?? _tag, functionName, msg.toString());
     }
     return;
   }
 
-  Future<void> error(String functionName, dynamic message) async {
+  Future<void> error(
+    String functionName, {
+    String? tag,
+    required dynamic msg,
+    bool saveLog = false,
+  }) async {
     if (_logFileName != null && _logger != null) {
-      _logger!.e(message);
-      await FlutterLogs.logError(_tag, functionName, message.toString());
+      _logger!.e(msg);
+      if (!saveLog) return;
+      await FlutterLogs.logError(tag ?? _tag, functionName, msg.toString());
     }
     return;
   }
 
-  Future<void> severe(String functionName, dynamic message) async {
+  Future<void> severe({
+    String? tag,
+    required String functionName,
+    dynamic msg,
+    bool saveLog = false,
+  }) async {
     if (_logFileName != null && _logger != null) {
-      _logger!.d(message);
-      await info(functionName, message);
+      _logger!.d(msg);
+      if (!saveLog) return;
+      await info(functionName, msg: msg);
     }
     return;
   }
@@ -116,7 +146,7 @@ class AppLogger {
     FlutterLogs.channel.setMethodCallHandler((call) async {
       if (call.method == 'logsExported') {
         final filePath = call.arguments.toString();
-        info("exportLogs", "logsExported: $filePath");
+        info("exportLogs", msg: "logsExported: $filePath");
         completer.complete(filePath);
       }
     });
@@ -137,11 +167,14 @@ class AppLogger {
           await SharePlus.instance.share(params);
         } else {
           // Log file doesn't exist
-          error("shareLogs", "Exported log file not found at $exportedPath");
+          error(
+            "shareLogs",
+            msg: "Exported log file not found at $exportedPath",
+          );
         }
       }
     } catch (e) {
-      error("shareLogs", "Error sharing logs: $e");
+      error("shareLogs", msg: "Error sharing logs: $e");
     }
   }
 
@@ -159,17 +192,20 @@ class AppLogger {
         final OpenResult result = await OpenFilex.open(logFilePath);
 
         if (result.type != ResultType.done) {
-          // You can log this error or show a message to the user
+          // You can log this error or show a msg to the user
           error(
             "openLogsExternally",
-            "Could not open log file: ${result.message}",
+            msg: "Could not open log file: ${result.message}",
           );
         }
       } else {
-        error("openLogsExternally", "Log file not found at path: $logFilePath");
+        error(
+          "openLogsExternally",
+          msg: "Log file not found at path: $logFilePath",
+        );
       }
     } else {
-      error("openLogsExternally", "No log file path found.");
+      error("openLogsExternally", msg: "No log file path found.");
     }
   }
 
@@ -186,12 +222,12 @@ class AppLogger {
         return await file.readAsString();
       } else {
         String errMsg = "Log file not found at path: $logFilePath";
-        error("openLogsExternally", errMsg);
+        error("openLogsExternally", msg: errMsg);
         return errMsg;
       }
     } else {
       String errMsg = "No log file path found.";
-      error("openLogsExternally", "No log file path found.");
+      error("openLogsExternally", msg: "No log file path found.");
       return errMsg;
     }
   }
@@ -210,11 +246,11 @@ class AppLogger {
         return LogData.fromData(logString);
       } else {
         String errMsg = "Log file not found at path: $logFilePath";
-        error("openLogsExternally", errMsg);
+        error("openLogsExternally", msg: errMsg);
         return [];
       }
     } else {
-      error("openLogsExternally", "No log file path found.");
+      error("openLogsExternally", msg: "No log file path found.");
       return [];
     }
   }
@@ -242,7 +278,7 @@ class AppLogger {
       }
       return '';
     } catch (e) {
-      error("getLogFilePath", e.toString());
+      error("getLogFilePath", msg: e.toString());
       // Fallback if no log file is found
       return '';
     }
@@ -271,7 +307,7 @@ class AppLogger {
       }
       return pathList;
     } catch (e) {
-      error("getLogFilePath", e.toString());
+      error("getLogFilePath", msg: e.toString());
       // Fallback if no log file is found
       return [];
     }
@@ -293,7 +329,7 @@ class AppLogger {
         }
       }
     } catch (e) {
-      error("getTotalLogFiles", "Error: $e");
+      error("getTotalLogFiles", msg: "Error: $e");
     }
 
     return totalLogFiles;
@@ -316,7 +352,7 @@ class AppLogger {
         }
       }
     } catch (e) {
-      error("clearLogFiles", "Error: $e");
+      error("clearLogFiles", msg: "Error: $e");
     }
 
     return deletedCount;
@@ -328,7 +364,7 @@ class AppLogger {
       final logsDirectory = Directory('${directory!.path}/$_saveLogPath');
 
       if (!await logsDirectory.exists()) {
-        warning("clearOldLogFiles", "Logs directory does not exist.");
+        warning("clearOldLogFiles", msg: "Logs directory does not exist.");
         return;
       }
 
@@ -339,7 +375,7 @@ class AppLogger {
           .toList();
 
       if (files.isEmpty) {
-        info("clearOldLogFiles", "No log files found to delete.");
+        info("clearOldLogFiles", msg: "No log files found to delete.");
         return;
       }
 
@@ -355,12 +391,12 @@ class AppLogger {
       for (final file in filesToDelete) {
         await file.delete();
         deletedCount++;
-        debug("clearOldLogFiles", "Deleted: ${file.path}");
+        debug("clearOldLogFiles", msg: "Deleted: ${file.path}");
       }
 
-      info("clearOldLogFiles", "Deleted $deletedCount old log file(s).");
+      info("clearOldLogFiles", msg: "Deleted $deletedCount old log file(s).");
     } catch (e, stacktrace) {
-      error("clearOldLogFiles", "Error: $e\n$stacktrace");
+      error("clearOldLogFiles", msg: "Error: $e\n$stacktrace");
     }
   }
 
@@ -372,7 +408,10 @@ class AppLogger {
       final logsDirectory = Directory('${directory!.path}/$_saveLogPath');
 
       if (!await logsDirectory.exists()) {
-        warning("clearLogsIfExceedsLimit", "Logs directory does not exist.");
+        warning(
+          "clearLogsIfExceedsLimit",
+          msg: "Logs directory does not exist.",
+        );
         return;
       }
 
@@ -389,23 +428,23 @@ class AppLogger {
 
       info(
         "clearLogsIfExceedsLimit",
-        "Total log size: ${totalSize / (1024 * 1024)} MB",
+        msg: "Total log size: ${totalSize / (1024 * 1024)} MB",
       );
 
       if (totalSize > maxSizeBytes) {
         info(
           "clearLogsIfExceedsLimit",
-          "Log size exceeds limit. Deleting old logs...",
+          msg: "Log size exceeds limit. Deleting old logs...",
         );
         await clearOldLogFiles(keepLatest: true);
       } else {
         debug(
           "clearLogsIfExceedsLimit",
-          "Log size is within limit. No deletion needed.",
+          msg: "Log size is within limit. No deletion needed.",
         );
       }
     } catch (e, stacktrace) {
-      error("clearLogsIfExceedsLimit", "Error: $e\n$stacktrace");
+      error("clearLogsIfExceedsLimit", msg: "Error: $e\n$stacktrace");
     }
   }
 }

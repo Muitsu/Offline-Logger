@@ -75,11 +75,23 @@ class _CreateLogDialogState extends State<CreateLogDialog> {
                   Navigator.pop(context);
 
                   if (selectedType == "Debug") {
-                    await AppLogger().debug("Send Log", msg);
+                    await AppLogger().debug(
+                      "Send Log",
+                      msg: msg,
+                      saveLog: true,
+                    );
                   } else if (selectedType == "Warning") {
-                    await AppLogger().warning("Send Log", msg);
+                    await AppLogger().warning(
+                      "Send Log",
+                      msg: msg,
+                      saveLog: true,
+                    );
                   } else {
-                    await AppLogger().error("Send Log", msg);
+                    await AppLogger().error(
+                      "Send Log",
+                      msg: msg,
+                      saveLog: true,
+                    );
                   }
                 },
                 child: Text("Send Log"),

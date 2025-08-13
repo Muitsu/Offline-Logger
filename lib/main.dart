@@ -5,8 +5,6 @@ import 'package:offline_logs/home.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await AppLogger().initialize();
-  // Log a test message
-  AppLogger().info("main", "Application started successfully.");
   runApp(const MyApp());
 }
 
