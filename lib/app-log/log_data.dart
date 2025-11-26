@@ -17,31 +17,50 @@ class LogData {
     required this.level,
   });
 
+  /// This method is robust and already handles multi-line messages correctly.
   factory LogData.fromRaw(String raw) {
-    final parts = raw
-        .split('}')
-        .map((p) => p.trim().replaceAll('{', ''))
-        .where((p) => p.isNotEmpty)
-        .toList();
+    final regex = RegExp(r'\{([^}]*)\}');
+    final matches = regex.allMatches(raw);
+    final parts = matches.map((match) => match.group(1) ?? '').toList();
+
+    if (parts.length != 5) {
+      return LogData(
+        tag: '',
+        method: '',
+        message: raw,
+        path: '',
+        date: '',
+        level: '',
+      );
+    }
 
     return LogData(
-      tag: parts.isNotEmpty ? parts[0] : '',
-      method: parts.length > 1 ? parts[1] : '',
-      path: parts.length > 2 ? parts[2] : '',
-      date: parts.length > 3 ? parts[3] : '',
-      level: parts.length > 4 ? parts[4] : '',
-      message: parts.length > 2 && !parts[2].startsWith('/') ? parts[2] : '',
+      tag: parts[0],
+      method: parts[1],
+      message: parts[2],
+      path: '',
+      date: parts[3],
+      level: parts[4],
     );
   }
 
+  /// CORRECTED: This method now correctly splits the entire text block by the start of a new log entry.
+  /// It no longer splits by newlines first, which was breaking multi-line messages.
   static List<LogData> fromData(String logString) {
-    return logString
-        .replaceAll('\r\n', '\n')
-        .split('\n')
-        .expand((line) => line.split(RegExp(r'(?=\{AppLogger\})')))
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
-        .map((e) => LogData.fromRaw(e))
+    // 1. Normalize line endings.
+    final normalizedString = logString.replaceAll('\r\n', '\n');
+
+    // 2. Split the entire string by the lookahead for a new log entry.
+    // This correctly handles multi-line log messages.
+    final rawEntries = normalizedString.split(RegExp(r'(?=\{AppLogger\})'));
+
+    // 3. Process the resulting list of raw log strings.
+    return rawEntries
+        .map((e) => e.trim()) // Trim whitespace from each entry.
+        .where((e) => e.isNotEmpty) // Filter out any empty strings.
+        .map(
+          (e) => LogData.fromRaw(e),
+        ) // Parse each entry into a LogData object.
         .toList()
         .reversed
         .toList();

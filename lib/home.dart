@@ -132,39 +132,35 @@ class _MyHomePageState extends State<MyHomePage> {
       clipBehavior: Clip.antiAlias,
       builder: (_) => ModalSheetView(
         title: "All Logs",
-        children: List.generate(
-          logData.length,
-          (index) => Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: Icon(Icons.description),
-                title: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'Log ${index + 1}',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Text(
-                      logData[index].lastAccessedSync().toString().split(
-                        " ",
-                      )[0],
-                      style: TextStyle(fontSize: 12, color: Colors.white54),
-                    ),
-                  ],
+        child: ListView.separated(
+          physics: BouncingScrollPhysics(),
+          padding: EdgeInsets.all(12),
+          itemCount: logData.length,
+          itemBuilder: (context, index) => ListTile(
+            leading: Icon(Icons.description),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Log ${index + 1}',
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
-                subtitle: Text(
-                  logData[index].path,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                Text(
+                  logData[index].lastAccessedSync().toString().split(" ")[0],
                   style: TextStyle(fontSize: 12, color: Colors.white54),
                 ),
-                onTap: () async => readLog(path: logData[index].path),
-              ),
-              Divider(height: 0, color: Colors.white10),
-            ],
+              ],
+            ),
+            subtitle: Text(
+              logData[index].path,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 12, color: Colors.white54),
+            ),
+            onTap: () async => readLog(path: logData[index].path),
           ),
+          separatorBuilder: (context, index) =>
+              Divider(height: 0, color: Colors.white10),
         ),
       ),
     );

@@ -43,9 +43,15 @@ class _ReadLogSheetState extends State<ReadLogSheet> {
               ),
               SizedBox(height: 8),
               Text("Message:"),
-              Text(data.message),
-              SizedBox(height: 8),
-              Text(data.date.toString()),
+              SelectableText(data.message),
+              SizedBox(height: 10),
+              Text(
+                data.date.toString(),
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
             ],
           ),
         ),
@@ -99,7 +105,17 @@ class _ReadLogSheetState extends State<ReadLogSheet> {
           },
         ),
       ),
-      children: selected == ViewMode.raw ? [Text(rawData)] : cleanWidget,
+      child: selected == ViewMode.raw
+          ? ListView(
+              padding: EdgeInsets.all(12),
+              children: [SelectableText(rawData)],
+            )
+          : ListView.builder(
+              padding: EdgeInsets.all(12),
+              physics: BouncingScrollPhysics(),
+              itemCount: cleanWidget.length,
+              itemBuilder: (context, index) => cleanWidget[index],
+            ),
     );
   }
 }

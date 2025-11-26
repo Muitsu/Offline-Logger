@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 class ModalSheetView extends StatelessWidget {
   final String title;
 
-  final List<Widget> children;
+  final Widget child;
   final List<Widget>? actions;
   final PreferredSizeWidget? bottom;
   const ModalSheetView({
     super.key,
-    required this.children,
+    required this.child,
     this.actions,
     required this.title,
     this.bottom,
@@ -34,14 +34,7 @@ class ModalSheetView extends StatelessWidget {
             color: Colors.black12,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Scrollbar(
-            radius: Radius.circular(16),
-            child: ListView(
-              physics: BouncingScrollPhysics(),
-              padding: EdgeInsets.all(12),
-              children: children,
-            ),
-          ),
+          child: Scrollbar(radius: Radius.circular(16), child: child),
         ),
       ),
     );
