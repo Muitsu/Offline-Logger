@@ -8,6 +8,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:open_filex/open_filex.dart';
 
+enum LogEnv { development, staging, production }
+
 class AppLogger {
   // 1. Singleton pattern implementation
   static final AppLogger _instance = AppLogger._internal();
@@ -22,16 +24,22 @@ class AppLogger {
   String? _logFileName;
   String? _saveLogPath;
   Logger? _logger;
+  LogEnv? _environment;
   final String _tag = "AppLogger";
+  bool _autoSave = false;
 
   // 2. Initialize the logger
   Future<void> initialize({
     String logFileName = "app_log",
     String saveLogPath = "AppLogs",
     int limitLogByte = 10 * 1024 * 1024,
+    LogEnv environment = LogEnv.development,
+    required bool autoSave,
   }) async {
     _logFileName = logFileName;
     _saveLogPath = saveLogPath;
+    _environment = environment;
+    _autoSave = autoSave;
     // Setup Logger
     _logger = Logger(
       printer: PrettyPrinter(
@@ -73,11 +81,11 @@ class AppLogger {
     String functionName, {
     String? tag,
     required dynamic msg,
-    bool saveLog = false,
+    bool? saveLog,
   }) async {
     if (_logFileName != null && _logger != null) {
       _logger!.d(msg);
-      if (!saveLog) return;
+      if (!(saveLog ?? _autoSave)) return;
       await FlutterLogs.logInfo(tag ?? _tag, functionName, msg.toString());
     }
     return;
@@ -87,11 +95,11 @@ class AppLogger {
     String functionName, {
     String? tag,
     required dynamic msg,
-    bool saveLog = false,
+    bool? saveLog,
   }) async {
     if (_logFileName != null && _logger != null) {
       _logger!.i(msg);
-      if (!saveLog) return;
+      if (!(saveLog ?? _autoSave)) return;
       await FlutterLogs.logInfo(tag ?? _tag, functionName, msg.toString());
     }
     return;
@@ -101,11 +109,11 @@ class AppLogger {
     String functionName, {
     String? tag,
     required dynamic msg,
-    bool saveLog = false,
+    bool? saveLog,
   }) async {
     if (_logFileName != null && _logger != null) {
       _logger!.w(msg);
-      if (!saveLog) return;
+      if (!(saveLog ?? _autoSave)) return;
       await FlutterLogs.logWarn(tag ?? _tag, functionName, msg.toString());
     }
     return;
@@ -115,11 +123,11 @@ class AppLogger {
     String functionName, {
     String? tag,
     required dynamic msg,
-    bool saveLog = false,
+    bool? saveLog,
   }) async {
     if (_logFileName != null && _logger != null) {
       _logger!.e(msg);
-      if (!saveLog) return;
+      if (!(saveLog ?? _autoSave)) return;
       await FlutterLogs.logError(tag ?? _tag, functionName, msg.toString());
     }
     return;
@@ -129,11 +137,11 @@ class AppLogger {
     String? tag,
     required String functionName,
     dynamic msg,
-    bool saveLog = false,
+    bool? saveLog,
   }) async {
     if (_logFileName != null && _logger != null) {
       _logger!.d(msg);
-      if (!saveLog) return;
+      if (!(saveLog ?? _autoSave)) return;
       await info(functionName, msg: msg);
     }
     return;
@@ -405,7 +413,9 @@ class AppLogger {
   }) async {
     try {
       final directory = await getExternalStorageDirectory();
-      final logsDirectory = Directory('${directory!.path}/$_saveLogPath');
+      final logsDirectory = Directory(
+        '${directory!.path}/$_saveLogPath/${_environment!.name}',
+      );
 
       if (!await logsDirectory.exists()) {
         warning(

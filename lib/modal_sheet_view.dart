@@ -21,7 +21,14 @@ class ModalSheetView extends StatelessWidget {
       width: MediaQuery.sizeOf(context).width,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(title),
+          title: Text(
+            title,
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 20,
+            ),
+          ),
           centerTitle: true,
           scrolledUnderElevation: 0,
           actions: actions,

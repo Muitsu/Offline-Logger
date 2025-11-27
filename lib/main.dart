@@ -4,7 +4,10 @@ import 'package:offline_logs/home.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await AppLogger().initialize();
+  await AppLogger().initialize(
+    autoSave: false,
+    environment: LogEnv.development,
+  );
   runApp(const MyApp());
 }
 
